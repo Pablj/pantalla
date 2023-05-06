@@ -225,7 +225,7 @@ int main() {
             if(posicion_actual_y < sizeof(menu) / sizeof(menu[0]) -1 ){
             //variable aux
             	posicion_actual_y++;
-      		lcd_clear();
+      		    lcd_clear();
             }
             
             button_A_pressed = false;  // Reiniciar variable
