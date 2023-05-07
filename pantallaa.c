@@ -66,7 +66,7 @@ static int addr = 0x27;
 
 #define BUTTON_Y 18
 #define BUTTON_A 16
-#define BUTTON_X 17
+#define BUTTON_X 15
 #define BUTTON_B 19
 
 
@@ -142,20 +142,38 @@ void lcd_init() {
     lcd_clear();
 }
 
-void button_Y_isr() {
-    button_Y_pressed = true;
+void button_isr(uint gpio, uint32_t events) {
+    if (gpio == BUTTON_Y) {
+        if (gpio_get(BUTTON_Y)) {
+            // El botón Y ha sido presionado
+            button_Y_pressed = true; 
+        } else {
+            // El botón Y ha sido liberado
+        }
+    } else if (gpio == BUTTON_X) {
+        if (gpio_get(BUTTON_X)) {
+            // El botón X ha sido presionado
+            button_X_pressed = true; 
+        } else {
+            // El botón X ha sido liberado
+        }
+    } else if (gpio == BUTTON_A) {
+        if (gpio_get(BUTTON_A)) {
+            button_A_pressed = true;  
+            // El botón A ha sido presionado
+        } else {
+            // El botón A ha sido liberado
+        }
+    } else if (gpio == BUTTON_B) {
+        if (gpio_get(BUTTON_B)) {
+            button_B_pressed = true; 
+            // El botón B ha sido presionado
+        } else {
+            // El botón B ha sido liberado
+        }
+    }
 }
 
-void button_A_isr() {
-    button_A_pressed = true;
-    
-}
-void button_X_isr() {
-    button_X_pressed = true;
-}
-void button_B_isr() {
-    button_B_pressed = true;
-}
 
 void botton_init(){
     gpio_init(BUTTON_Y );
@@ -173,10 +191,11 @@ void botton_init(){
     gpio_pull_down(BUTTON_B);
     gpio_pull_down(BUTTON_A);
     
-    gpio_set_irq_enabled_with_callback(BUTTON_Y, GPIO_IRQ_EDGE_RISE, true, &button_Y_isr);
-    gpio_set_irq_enabled_with_callback(BUTTON_X, GPIO_IRQ_EDGE_RISE, true, &button_X_isr);
-    gpio_set_irq_enabled_with_callback(BUTTON_B, GPIO_IRQ_EDGE_RISE, true, &button_B_isr);
-    gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_RISE, true, &button_A_isr);
+    gpio_set_irq_enabled_with_callback(BUTTON_Y, GPIO_IRQ_EDGE_RISE, true, &button_isr);
+    gpio_set_irq_enabled_with_callback(BUTTON_X, GPIO_IRQ_EDGE_RISE, true, &button_isr);
+    gpio_set_irq_enabled_with_callback(BUTTON_A, GPIO_IRQ_EDGE_RISE, true, &button_isr);
+    gpio_set_irq_enabled_with_callback(BUTTON_B, GPIO_IRQ_EDGE_RISE, true, &button_isr);
+    
 }
 void i2c_init_local(){
     i2c_init(i2c_default, 100 * 1000);
@@ -197,7 +216,7 @@ void init(){
 void mostrarPantalla(int posicion_x,int posicion_y){
 
     lcd_set_cursor(0,0);
-    lcd_string(menu[posicion_y][0]);
+    lcd_string(menu[posicion_y][posicion_x]);
     
     
 }
@@ -207,35 +226,46 @@ int main() {
     init();   
     int posicion_actual_x=POSICION_INICIAL_X;
     int posicion_actual_y=POSICION_INICIAL_Y;	
-   
+    const int columnas=sizeof(menu[0]) / sizeof(int) - 1;
+    const int filas=sizeof(menu) / sizeof(menu[0]) -1 ;
     
     while (1) {
     
       	mostrarPantalla(posicion_actual_x,posicion_actual_y);
-        if (button_Y_pressed) {
+        if (button_Y_pressed ) {
             if(posicion_actual_y > 0 ){
             	posicion_actual_y--;
-            	lcd_clear();
+      		lcd_clear();
             }
-            
-            
-            button_Y_pressed = false;  // Reiniciar variable
         }
+            button_Y_pressed = false;
         if (button_A_pressed) {
-            if(posicion_actual_y < sizeof(menu) / sizeof(menu[0]) -1 ){
+            if(posicion_actual_y < filas ){
             //variable aux
             	posicion_actual_y++;
-      		    lcd_clear();
+      		lcd_clear();
             }
             
             button_A_pressed = false;  // Reiniciar variable
         }
         if (button_X_pressed) {
-            // Hacer algo cuando se pulsa el botón X
+            if(posicion_actual_x > 0 ){
+              // Hacer algo cuando se pulsa el botón X
+              posicion_actual_x--;
+              lcd_clear();
+            }
+            
             button_X_pressed = false;  // Reiniciar variable
         }
         if (button_B_pressed) {
-            // Hacer algo cuando se pulsa el botón X
+            if ( posicion_actual_x < columnas ) {
+		if(menu[posicion_actual_y][posicion_actual_x+1] != ""){
+		      // Hacer algo cuando se pulsa el botón X
+		      posicion_actual_x++;
+		      lcd_clear();
+		}
+              
+            }
             button_B_pressed = false;  // Reiniciar variable
         }
       
