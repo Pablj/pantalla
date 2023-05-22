@@ -87,7 +87,7 @@ void lcd_send_byte(uint8_t val, int mode) {
     lcd_toggle_enable(low);
 }
 
-void lcd_clear(void) {
+void lcd_clear() {
     lcd_send_byte(LCD_CLEARDISPLAY, LCD_COMMAND);
 }
 
@@ -127,4 +127,8 @@ void i2c_init_local(int pin_sda, int pin_scl){
     // Make the I2C pins available to picotool
     bi_decl(bi_2pins_with_func(pin_sda,pin_scl, GPIO_FUNC_I2C));
     lcd_init();
+}
+void mostrarPantalla(int posicion_x,int posicion_y,char *palabra){
+	lcd_set_cursor(0,0);
+	lcd_string(palabra);
 }
