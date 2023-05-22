@@ -70,11 +70,12 @@ static int addr = 0x27;
 #define BUTTON_B 19
 
 
-volatile bool button_Y_pressed = false;
-volatile bool button_A_pressed = false;
-volatile bool button_X_pressed = false;
-volatile bool button_B_pressed = false;
+const char button_Y_pressed = "Y";
+const char button_A_pressed = "A";
+const char button_X_pressed = "X";
+const char button_B_pressed = "B";
 
+volatile char botton_pressed;
 
 static char *menu[][4] = {
     {"Estado", "Temperatura", "Motor", "Bateria"},
@@ -146,27 +147,27 @@ void button_isr(uint gpio, uint32_t events) {
     if (gpio == BUTTON_Y) {
         if (gpio_get(BUTTON_Y)) {
             // El botón Y ha sido presionado
-            button_Y_pressed = true; 
+            button_pressed = button_Y_pressed; 
         } else {
             // El botón Y ha sido liberado
         }
     } else if (gpio == BUTTON_X) {
         if (gpio_get(BUTTON_X)) {
             // El botón X ha sido presionado
-            button_X_pressed = true; 
+           button_pressed = button_X_pressed; 
         } else {
             // El botón X ha sido liberado
         }
     } else if (gpio == BUTTON_A) {
         if (gpio_get(BUTTON_A)) {
-            button_A_pressed = true;  
+            button_pressed = button_A_pressed; 
             // El botón A ha sido presionado
         } else {
             // El botón A ha sido liberado
         }
     } else if (gpio == BUTTON_B) {
         if (gpio_get(BUTTON_B)) {
-            button_B_pressed = true; 
+            button_pressed = button_B_pressed; 
             // El botón B ha sido presionado
         } else {
             // El botón B ha sido liberado
@@ -231,47 +232,53 @@ int main() {
     
     while (1) {
     
-      	mostrarPantalla(posicion_actual_x,posicion_actual_y);
-        if (button_Y_pressed ) {
-            if(posicion_actual_y > 0 ){
-            	posicion_actual_y--;
-      		lcd_clear();
-            }
-        }
-            button_Y_pressed = false;
-        if (button_A_pressed) {
-            if(posicion_actual_y < filas ){
-            //variable aux
-            	posicion_actual_y++;
-      		lcd_clear();
-            }
-            
-            button_A_pressed = false;  // Reiniciar variable
-        }
-        if (button_X_pressed) {
-            if(posicion_actual_x > 0 ){
-              // Hacer algo cuando se pulsa el botón X
-              posicion_actual_x--;
-              lcd_clear();
-            }
-            
-            button_X_pressed = false;  // Reiniciar variable
-        }
-        if (button_B_pressed) {
-            if ( posicion_actual_x < columnas ) {
-		if(menu[posicion_actual_y][posicion_actual_x+1] != ""){
-		      // Hacer algo cuando se pulsa el botón X
-		      posicion_actual_x++;
-		      lcd_clear();
-		}
-              
-            }
-            button_B_pressed = false;  // Reiniciar variable
-        }
-      
-    }
+      	mostrarPantalla(posicion_actual_x, posicion_actual_y);
 
-    return 0;
+	switch (button_pressed) {
+	    case 'Y':
+		if (posicion_actual_y > 0) {
+		    posicion_actual_y--;
+		    lcd_clear();
+		    botton_pressed="N";
+		    
+		}
+		break;
+
+	    case 'A':
+		if (posicion_actual_y < filas) {
+		    posicion_actual_y++;
+		    lcd_clear();
+		    botton_pressed="N";
+		}
+		break;
+
+	    case 'X':
+		if (posicion_actual_x > 0) {
+		    posicion_actual_x--;
+		    lcd_clear();
+		    botton_pressed="N";
+		}
+		break;
+
+	    case 'B':
+		if (posicion_actual_x < columnas) {
+		    if (menu[posicion_actual_y][posicion_actual_x + 1] != "") {
+		        posicion_actual_x++;
+		        lcd_clear();
+		        botton_pressed="N";
+		    }
+		}
+		break;
+
+	    default:
+		// Opción por defecto si no se cumple ninguna de las condiciones anteriores
+		break;
+	}
+
+	      
+	    }
+
+	    return 0;
 
 
 }
