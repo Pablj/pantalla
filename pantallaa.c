@@ -70,18 +70,25 @@ static int addr = 0x27;
 #define BUTTON_B 19
 
 
-const char button_Y_pressed = "Y";
-const char button_A_pressed = "A";
-const char button_X_pressed = "X";
-const char button_B_pressed = "B";
+const char button_Y_pressed = 'Y';
+const char button_A_pressed = 'A';
+const char button_X_pressed = 'X';
+const char button_B_pressed = 'B';
 
-volatile char botton_pressed;
-
-static char *menu[][4] = {
-    {"Estado", "Temperatura", "Motor", "Bateria"},
-    {"Acceso Manual", "Motor","",""},
-    {"Ajustes", "", "", ""}
+volatile char button_pressed;
+static char *menu[][3][4] = {
+    {
+        {"Menu", "Temperatura", "Motor", "Bateria"},
+        {"Menu", "Motor", "", ""},
+        {"Menu", "", "", ""}
+    },
+    {
+        {"Estado", "T:002", "C:004", "B:4% I:4[A]"},
+        {"Acceso Manual", "si", "", ""},
+        {"Ajustes", "", "", ""}
+    }
 };
+char opciones[2][16];
 /* Quick helper function for single byte transfers */
 void i2c_write_byte(uint8_t val) {
 #ifdef i2c_default
@@ -148,6 +155,7 @@ void button_isr(uint gpio, uint32_t events) {
         if (gpio_get(BUTTON_Y)) {
             // El botón Y ha sido presionado
             button_pressed = button_Y_pressed; 
+            
         } else {
             // El botón Y ha sido liberado
         }
@@ -155,23 +163,24 @@ void button_isr(uint gpio, uint32_t events) {
         if (gpio_get(BUTTON_X)) {
             // El botón X ha sido presionado
            button_pressed = button_X_pressed; 
+           
         } else {
             // El botón X ha sido liberado
         }
     } else if (gpio == BUTTON_A) {
         if (gpio_get(BUTTON_A)) {
-            button_pressed = button_A_pressed; 
+            button_pressed = button_A_pressed;
+            
             // El botón A ha sido presionado
         } else {
             // El botón A ha sido liberado
         }
     } else if (gpio == BUTTON_B) {
-        if (gpio_get(BUTTON_B)) {
+        
             button_pressed = button_B_pressed; 
+            
             // El botón B ha sido presionado
-        } else {
-            // El botón B ha sido liberado
-        }
+        
     }
 }
 
@@ -216,11 +225,15 @@ void init(){
 
 void mostrarPantalla(int posicion_x,int posicion_y){
 
-    lcd_set_cursor(0,0);
-    lcd_string(menu[posicion_y][posicion_x]);
+     for(int i=0;i<2;i++){
+    sprintf(opciones[i], "%s", menu[i][posicion_y][posicion_x]);
+    lcd_set_cursor(i,0);
+    lcd_string(opciones[i]);
+    }
     
     
 }
+
 
 int main() {
 
@@ -239,7 +252,7 @@ int main() {
 		if (posicion_actual_y > 0) {
 		    posicion_actual_y--;
 		    lcd_clear();
-		    botton_pressed="N";
+		    button_pressed='N';
 		    
 		}
 		break;
@@ -248,7 +261,7 @@ int main() {
 		if (posicion_actual_y < filas) {
 		    posicion_actual_y++;
 		    lcd_clear();
-		    botton_pressed="N";
+		    button_pressed='N';
 		}
 		break;
 
@@ -256,7 +269,7 @@ int main() {
 		if (posicion_actual_x > 0) {
 		    posicion_actual_x--;
 		    lcd_clear();
-		    botton_pressed="N";
+		    button_pressed='N';
 		}
 		break;
 
@@ -265,7 +278,7 @@ int main() {
 		    if (menu[posicion_actual_y][posicion_actual_x + 1] != "") {
 		        posicion_actual_x++;
 		        lcd_clear();
-		        botton_pressed="N";
+		        button_pressed='N';
 		    }
 		}
 		break;
