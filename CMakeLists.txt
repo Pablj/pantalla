@@ -1,5 +1,7 @@
 add_executable(pantalla
-        pantallaa.c
+        pantalla.c
+        LCD_16_02.c
+        LCD_16_02.h
         )
 
 # pull in common dependencies
